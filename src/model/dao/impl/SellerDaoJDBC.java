@@ -68,8 +68,7 @@ public class SellerDaoJDBC implements SellerDao {
 
 		try {
 			preparedStatement = connection.prepareStatement("UPDATE seller "
-					+ "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
-					+ "WHERE Id = ?");
+					+ "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? " + "WHERE Id = ?");
 
 			preparedStatement.setString(1, obj.getNome());
 			preparedStatement.setString(2, obj.getEmail());
@@ -77,7 +76,7 @@ public class SellerDaoJDBC implements SellerDao {
 			preparedStatement.setDouble(4, obj.getBaseSalary());
 			preparedStatement.setInt(5, obj.getDepartment().getId());
 			preparedStatement.setInt(6, obj.getId());
-			
+
 			preparedStatement.executeUpdate();
 
 		} catch (SQLException e) {
@@ -88,10 +87,28 @@ public class SellerDaoJDBC implements SellerDao {
 
 	}
 
-
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
+		PreparedStatement preparedStatement = null;
+
+		try {
+			preparedStatement = connection.prepareStatement("DELETE FROM seller WHERE Id = ?");
+
+			preparedStatement.setInt(1, id);
+			
+			int linhasAfetadas =  preparedStatement.executeUpdate();
+			
+			if (linhasAfetadas == 0) {
+				throw new DbException("ID NAO EXISTE!");
+			}
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+
+		finally {
+			DB.closeStatement(preparedStatement);
+		}
 
 	}
 
