@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import db.DB;
 import db.DbException;
 import model.dao.SellerDao;
@@ -65,9 +64,30 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void update(Seller obj) {
-		// TODO Auto-generated method stub
+		PreparedStatement preparedStatement = null;
+
+		try {
+			preparedStatement = connection.prepareStatement("UPDATE seller "
+					+ "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
+					+ "WHERE Id = ?");
+
+			preparedStatement.setString(1, obj.getNome());
+			preparedStatement.setString(2, obj.getEmail());
+			preparedStatement.setDate(3, new java.sql.Date(obj.getBirthdate().getTime()));
+			preparedStatement.setDouble(4, obj.getBaseSalary());
+			preparedStatement.setInt(5, obj.getDepartment().getId());
+			preparedStatement.setInt(6, obj.getId());
+			
+			preparedStatement.executeUpdate();
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(preparedStatement);
+		}
 
 	}
+
 
 	@Override
 	public void deleteById(Integer id) {
