@@ -4,10 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 import db.DB;
 import db.DbException;
@@ -25,7 +27,39 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
+		PreparedStatement preparedStatement = null;
+
+		try {
+			preparedStatement = connection.prepareStatement("INSERT INTO seller"
+					+ "(Name, Email, BirthDate, BaseSalary, DepartmentId)" + "VALUES" + "(?, ?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+
+			preparedStatement.setString(1, obj.getNome());
+			preparedStatement.setString(2, obj.getEmail());
+			preparedStatement.setDate(3, new java.sql.Date(obj.getBirthdate().getTime()));
+			preparedStatement.setDouble(4, obj.getBaseSalary());
+			preparedStatement.setInt(5, obj.getDepartment().getId());
+
+			int linhasAfetadas = preparedStatement.executeUpdate();
+
+			if (linhasAfetadas > 0) {
+				ResultSet resultSet = preparedStatement.getGeneratedKeys();
+				if (resultSet.next()) {
+					int id = resultSet.getInt(1);
+					obj.setId(id);
+
+				}
+				DB.closeResulSet(resultSet);
+
+			} else {
+				throw new DbException("ERRO INEXPERADO NENHUMA LINHA INSERIDA");
+			}
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(preparedStatement);
+		}
 
 	}
 
@@ -104,7 +138,8 @@ public class SellerDaoJDBC implements SellerDao {
 
 			List<Seller> listaSellers = new ArrayList<Seller>();
 
-			Map<Integer, Department> map = new HashMap<Integer, Department>(); //controlar pra nao repetir o departamento
+			Map<Integer, Department> map = new HashMap<Integer, Department>(); // controlar pra nao repetir o
+																				// departamento
 
 			while (resultSet.next()) {
 
